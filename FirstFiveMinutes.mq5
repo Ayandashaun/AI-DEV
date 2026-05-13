@@ -259,14 +259,15 @@ void DrawFVGRectangle(int barIndex, double top, double bottom, bool isBullish)
    color rectColor = isBullish ? BullishFVGColor : BearishFVGColor;
    
    // Create rectangle object
-   ObjectCreate(0, rectName, OBJ_RECTANGLE, 0, currentTime, top, futureTime, bottom);
-   ObjectSetInteger(0, rectName, OBJPROP_FILL, true);
-   ObjectSetInteger(0, rectName, OBJPROP_FILLTRANSPARENCY, FVGOpacity);
-   ObjectSetInteger(0, rectName, OBJPROP_COLOR, rectColor);
-   ObjectSetInteger(0, rectName, OBJPROP_BORDER_TYPE, BORDER_FLAT);
-   ObjectSetInteger(0, rectName, OBJPROP_BACK, true);
-   
-   fvgCount++;
+   if(ObjectCreate(0, rectName, OBJ_RECTANGLE, 0, currentTime, top, futureTime, bottom))
+   {
+      ObjectSetInteger(0, rectName, OBJPROP_FILL, true);
+      ObjectSetInteger(0, rectName, OBJPROP_FILLTRANSPARENCY, FVGOpacity);
+      ObjectSetInteger(0, rectName, OBJPROP_COLOR, rectColor);
+      ObjectSetInteger(0, rectName, OBJPROP_BORDER_TYPE, BORDER_FLAT);
+      ObjectSetInteger(0, rectName, OBJPROP_BACK, true);
+      fvgCount++;
+   }
 }
 
 // Detect engulfing candles
@@ -331,13 +332,14 @@ void DrawEngulfingArrow(int barIndex, bool isBullish, double candleLow, double c
    // Create arrow
    int arrowCode = isBullish ? 241 : 242; // 241=up arrow, 242=down arrow
    
-   ObjectCreate(0, arrowName, OBJ_ARROW, 0, arrowTime, arrowPrice);
-   ObjectSetInteger(0, arrowName, OBJPROP_ARROWCODE, arrowCode);
-   ObjectSetInteger(0, arrowName, OBJPROP_COLOR, isBullish ? clrBlue : clrRed);
-   ObjectSetInteger(0, arrowName, OBJPROP_WIDTH, ArrowSize);
-   ObjectSetInteger(0, arrowName, OBJPROP_BACK, false);
-   
-   engulfingCount++;
+   if(ObjectCreate(0, arrowName, OBJ_ARROW, 0, arrowTime, arrowPrice))
+   {
+      ObjectSetInteger(0, arrowName, OBJPROP_ARROWCODE, arrowCode);
+      ObjectSetInteger(0, arrowName, OBJPROP_COLOR, isBullish ? clrBlue : clrRed);
+      ObjectSetInteger(0, arrowName, OBJPROP_WIDTH, ArrowSize);
+      ObjectSetInteger(0, arrowName, OBJPROP_BACK, false);
+      engulfingCount++;
+   }
 }
 
 // Calculate ATR for arrow spacing
@@ -358,18 +360,22 @@ double CalculateATR(int barIndex)
 void DrawFirstFiveMinLines()
 {
    // Draw high line
-   ObjectCreate(0, lineHighName, OBJ_HLINE, 0, 0, first5MinHigh);
-   ObjectSetInteger(0, lineHighName, OBJPROP_COLOR, LineHighColor);
-   ObjectSetInteger(0, lineHighName, OBJPROP_STYLE, LineStyle);
-   ObjectSetInteger(0, lineHighName, OBJPROP_WIDTH, LineThickness);
-   ObjectSetInteger(0, lineHighName, OBJPROP_BACK, true);
+   if(ObjectCreate(0, lineHighName, OBJ_HLINE, 0, 0, first5MinHigh))
+   {
+      ObjectSetInteger(0, lineHighName, OBJPROP_COLOR, LineHighColor);
+      ObjectSetInteger(0, lineHighName, OBJPROP_STYLE, LineStyle);
+      ObjectSetInteger(0, lineHighName, OBJPROP_WIDTH, LineThickness);
+      ObjectSetInteger(0, lineHighName, OBJPROP_BACK, true);
+   }
    
    // Draw low line
-   ObjectCreate(0, lineLowName, OBJ_HLINE, 0, 0, first5MinLow);
-   ObjectSetInteger(0, lineLowName, OBJPROP_COLOR, LineLowColor);
-   ObjectSetInteger(0, lineLowName, OBJPROP_STYLE, LineStyle);
-   ObjectSetInteger(0, lineLowName, OBJPROP_WIDTH, LineThickness);
-   ObjectSetInteger(0, lineLowName, OBJPROP_BACK, true);
+   if(ObjectCreate(0, lineLowName, OBJ_HLINE, 0, 0, first5MinLow))
+   {
+      ObjectSetInteger(0, lineLowName, OBJPROP_COLOR, LineLowColor);
+      ObjectSetInteger(0, lineLowName, OBJPROP_STYLE, LineStyle);
+      ObjectSetInteger(0, lineLowName, OBJPROP_WIDTH, LineThickness);
+      ObjectSetInteger(0, lineLowName, OBJPROP_BACK, true);
+   }
 }
 
 // Update first 5-minute lines (extend until market close)

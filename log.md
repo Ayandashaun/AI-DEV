@@ -289,9 +289,25 @@ FFM_Engulf_[BarIndex]
 
 - **Specification**: 100% ✓
 - **Git Setup**: 100% ✓
-- **Indicator Code**: 0% ⏳
+- **Indicator Code**: 95% ✓
 - **Testing**: 0% ⏳
 - **Documentation**: 10% ⏳
+
+### Session 4: Error Handling & Polish
+**Date**: 2026-05-13
+**Status**: In Progress
+
+#### Actions Completed
+- [x] Added ObjectCreate() return value checking to all drawing functions
+  - DrawFVGRectangle(): Only increments counter if object created successfully
+  - DrawEngulfingArrow(): Only increments counter if object created successfully
+  - DrawFirstFiveMinLines(): Validates both line creations
+  - Status: SUCCESS ✓
+
+#### Benefits
+- Prevents counter increments on failed object creation
+- More robust handling of MQL5 object creation
+- Better memory management and object tracking
 
 ---
 
