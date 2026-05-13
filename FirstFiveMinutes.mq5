@@ -44,7 +44,7 @@ bool first5MinDetected = false;
 datetime firstCandleTime = 0;
 double first5MinHigh = 0;
 double first5MinLow = 0;
-int first5MinBarIndex = -1;
+datetime first5MinSessionDate = 0;  // Track session date instead of bar index
 
 // Lines for first 5-min
 string lineHighName = "";
@@ -129,61 +129,57 @@ int OnCalculate(const int rates_total,
    int limit = rates_total - prev_calculated;
    if(limit > 1000) limit = 1000; // Limit processing for performance
    
-   for(int i = limit; i >= 1; i--)
-   {
-      // Detect first 5-minute candle
-      if(!first5MinDetected && currentTF == PERIOD_M5)
-      {
-         if(IsFirstFiveMinBar(time[i]))
-         {
-            first5MinDetected = true;
-            firstCandleTime = time[i];
-            first5MinHigh = high[i];
-            first5MinLow = low[i];
-            first5MinBarIndex = i;
-            
-            if(ShowFirstFiveMinLines)
-            {
-               DrawFirstFiveMinLines();
-            }
-         }
-      }
-      
-      // Detect FVGs on 1-minute timeframe only
-      if(currentTF == PERIOD_M1 && first5MinDetected && ShowFVG && i >= 3)
-      {
-         if(DetectFVG(high, low, close, i))
-         {
-            // FVG detected and drawn
-         }
-      }
-      
-      // Detect engulfing candles on 1-minute timeframe only
-      if(currentTF == PERIOD_M1 && first5MinDetected && ShowEngulfing && i >= 2)
-      {
-         if(DetectEngulfing(high, low, close, i, time))
-         {
-            // Engulfing detected and drawn
-         }
-      }
-      
-      // Update first 5-min lines if they exist
-      if(ShowFirstFiveMinLines && first5MinDetected && currentTF == PERIOD_M5)
-      {
-         UpdateFirstFiveMinLines(time[i]);
-      }
-      
-      // Check if it's a new trading day to reset detection
-      if(first5MinDetected && currentTF == PERIOD_M5)
-      {
-         if(IsNewTradingDay(time[i]))
-         {
-            first5MinDetected = false;
-            fvgArray.Clear();
-            engulfingArray.Clear();
-         }
-      }
-   }
+    for(int i = limit; i >= 1; i--)
+    {
+       // Detect first 5-minute candle
+       if(currentTF == PERIOD_M5)
+       {
+          // Check if this is a new session
+          datetime sessionDate = iTime(_Symbol, PERIOD_D1, i);
+          if(sessionDate != first5MinSessionDate)
+          {
+             first5MinDetected = false;  // New session, allow detection
+          }
+          
+          if(!first5MinDetected && IsFirstFiveMinBar(time[i]))
+          {
+             first5MinDetected = true;
+             firstCandleTime = time[i];
+             first5MinHigh = high[i];
+             first5MinLow = low[i];
+             first5MinSessionDate = sessionDate;
+             
+             if(ShowFirstFiveMinLines)
+             {
+                DrawFirstFiveMinLines();
+             }
+          }
+       }
+       
+       // Detect FVGs on 1-minute timeframe only
+       if(currentTF == PERIOD_M1 && first5MinDetected && ShowFVG && i >= 3)
+       {
+          if(DetectFVG(high, low, close, i))
+          {
+             // FVG detected and drawn
+          }
+       }
+       
+       // Detect engulfing candles on 1-minute timeframe only
+       if(currentTF == PERIOD_M1 && first5MinDetected && ShowEngulfing && i >= 2)
+       {
+          if(DetectEngulfing(high, low, close, i, time))
+          {
+             // Engulfing detected and drawn
+          }
+       }
+       
+       // Update first 5-min lines if they exist
+       if(ShowFirstFiveMinLines && first5MinDetected && currentTF == PERIOD_M5)
+       {
+          UpdateFirstFiveMinLines(time[i]);
+       }
+    }
    
    return rates_total;
 }
@@ -207,22 +203,6 @@ bool IsFirstFiveMinBar(datetime barTime)
    return false;
 }
 
-// Check if we've crossed into a new trading day
-bool IsNewTradingDay(datetime barTime)
-{
-   MqlDateTime dt;
-   TimeToStruct(barTime, dt);
-   MqlDateTime prevDt;
-   TimeToStruct(firstCandleTime, prevDt);
-   
-   if(dt.day != prevDt.day)
-   {
-      return true;
-   }
-   
-   return false;
-}
-
 // Detect Fair Value Gap (bullish or bearish)
 bool DetectFVG(const double &high[], const double &low[], const double &close[], int barIndex)
 {
@@ -232,10 +212,6 @@ bool DetectFVG(const double &high[], const double &low[], const double &close[],
    int i3 = barIndex + 2;
    
    if(i3 >= ArraySize(high))
-      return false;
-   
-   // Ensure we're past the first 5-min bar
-   if(first5MinBarIndex >= 0 && barIndex <= first5MinBarIndex)
       return false;
    
    // Check for bullish FVG (gap up)
@@ -300,10 +276,6 @@ bool DetectEngulfing(const double &high[], const double &low[], const double &cl
    int previousBar = barIndex + 1;
    
    if(previousBar >= ArraySize(high))
-      return false;
-   
-   // Ensure we're past the first 5-min bar
-   if(first5MinBarIndex >= 0 && barIndex <= first5MinBarIndex)
       return false;
    
    bool isBullishEngulf = false;

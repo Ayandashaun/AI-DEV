@@ -248,6 +248,19 @@ FFM_Engulf_[BarIndex]
    - **File**: FirstFiveMinutes.mq5, DetectFVG() and DetectEngulfing()
    - **Status**: FIXED ✓
 
+3. **Session Date Tracking Refinement**
+   - **Problem**: Bar index is not reliable across different timeframes when switching
+   - **Solution**: Changed to track first5MinSessionDate (datetime) instead of first5MinBarIndex
+   - **Benefits**: Automatically resets detection for new trading day, works consistently on both 1m and 5m charts
+   - **File**: FirstFiveMinutes.mq5, global variables and OnCalculate()
+   - **Status**: FIXED ✓
+
+4. **Removed Unnecessary Function**
+   - **Problem**: IsNewTradingDay() function became redundant with session date tracking
+   - **Solution**: Removed function, integrated logic into OnCalculate() using iTime(PERIOD_D1)
+   - **File**: FirstFiveMinutes.mq5
+   - **Status**: REFACTORED ✓
+
 ---
 
 ## Decisions Log
