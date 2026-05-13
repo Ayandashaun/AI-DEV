@@ -235,7 +235,7 @@ bool DetectFVG(const double &high[], const double &low[], const double &close[],
       return false;
    
    // Ensure we're past the first 5-min bar
-   if(barIndex >= first5MinBarIndex)
+   if(first5MinBarIndex >= 0 && barIndex <= first5MinBarIndex)
       return false;
    
    // Check for bullish FVG (gap up)
@@ -303,7 +303,7 @@ bool DetectEngulfing(const double &high[], const double &low[], const double &cl
       return false;
    
    // Ensure we're past the first 5-min bar
-   if(barIndex >= first5MinBarIndex)
+   if(first5MinBarIndex >= 0 && barIndex <= first5MinBarIndex)
       return false;
    
    bool isBullishEngulf = false;
@@ -371,25 +371,14 @@ void DrawEngulfingArrow(int barIndex, bool isBullish, double candleLow, double c
 // Calculate ATR for arrow spacing
 double CalculateATR(int barIndex)
 {
-   double atr = 0;
-   double trueRange = 0;
+   double atr = iATR(_Symbol, _Period, AtrPeriod, barIndex);
    
-   // Get the last AtrPeriod bars
-   for(int i = 0; i < AtrPeriod; i++)
+   // Fallback if iATR fails
+   if(atr <= 0)
    {
-      double high = High[barIndex + i];
-      double low = Low[barIndex + i];
-      double prevClose = (barIndex + i + 1 < iBars(_Symbol, _Period)) ? Close[barIndex + i + 1] : Close[barIndex + i];
-      
-      double tr1 = high - low;
-      double tr2 = MathAbs(high - prevClose);
-      double tr3 = MathAbs(low - prevClose);
-      
-      trueRange = MathMax(tr1, MathMax(tr2, tr3));
-      atr += trueRange;
+      atr = High[barIndex] - Low[barIndex];
    }
    
-   atr = atr / AtrPeriod;
    return atr;
 }
 
